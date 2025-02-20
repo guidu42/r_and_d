@@ -217,7 +217,7 @@
         "files": [
             "./assets/bootstrap.ts",
             "./assets/controllers.json",
-            "./assets/controllers/hello_controller.js"
+            "./assets/controllers/hello_controller.ts"
         ]
     },
     "symfony/translation": {

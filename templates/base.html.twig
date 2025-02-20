@@ -5,18 +5,355 @@
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
         {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
+            {{ encore_entry_link_tags('index') }}
         {% endblock %}
 
         {% block javascripts %}
-            {{ encore_entry_script_tags('app') }}
+            {{ encore_entry_script_tags('scripts') }}
         {% endblock %}
     </head>
     <body>
         {% block body %}
-        <div data-controller="hello">
+            <div class="container my-5">
+                <div class="row">
+                    <div class="col-12">
+                        <h1>Stimulus</h1>
+                        <h2>C'est quoi ?</h2>
+                        <p>
+                            Stimulus c'est un framework front développé par BaseCamp en 2018. Donc c'est pas symfo
+                            <a href="https://stimulus.hotwired.dev/">Documentation</a><br>
+                            Il n'a pas pour vocation à remplacer VueJs ou React. L'objectif est de structurer le code Js pour éviter qu'il se transforme en bouillie.
+                        </p>
+                        <p>
+                            Principes:
+                            <ul>
+                                <li><a href="#controllers">Un Controller javascript</a></li>
+                                <li><a href="">Les Targets</a></li>
+                                <li><a href="">Les Actions</a></li>
+                                <li><a href="">Les Values</a></li>
+                            </ul>
+                        </p>
 
-        </div>
+                        <div class="my-5" data-controller="hello">
+                            <h3>Mon premier Controller !</h3>
+                        </div>
+
+                        <p>On lie (=connect()) le controller à l'élément racine qui va le porter.<br>
+                            On utilise l'attribut: <strong>data-controller="[identifier]"</strong>
+                        </p>
+
+                        <h2>Le Controller</h2>
+                        <p>
+                            Un Controller c'est:
+                        </p>
+                        <ul id="controllers">
+                            <li>Un identifier = Nom du controller</li>
+                            <li>Une classe Js qui extends de Controller</li>
+                        </ul>
+
+                        <p>
+                            Nommage: le fichier du controller doit se nommer = [identifier]_controller.(js|ts)<br>
+                            Si on a un _ dans le nom du fichier, il devient - dans l'Identifier.<br>
+                            Si le fichier est dans un répertoire, on ajoute -- au nom de l'Identifier.<br><br>
+                            Ex:<br>
+                                - date_picker_controller.js = date-picker<br>
+                                - users/list_item_controller.js = users--list-item<br>
+                            <br>
+
+                            NB: ON UTILISE LE CAMELCASE POUR lES PROPERTIES ET METHODS dans le controller
+                        </p>
+
+                        <h3>Les scopes</h3>
+                        <p>Le scope d'un controller ne lui permet de connaître que ce qu'il y a un l'intérieur de son élément racine. Il ne peut connaître ce qu'il y a en dehors.<br>
+                            Il n'a aps accès non plus au scope de Controllers enfants
+                        </p>
+
+                        <h3>Controllers Nested</h3>
+                        <p>Il est possible d'appeler des Controllers dans des élements déjà géré par un Controller. Attention au scope</p>
+
+                        <h3>Multiple Controllers</h3>
+                        <p>IMPORTANT: Un élément peut porter plusieurs Controller. On définie dans l'attribut data-controller la liste des identifier séparés par un ' '</p>
+                        <p>Un Controller peut exister pour plusieurs éléments sur la même page.</p>
+
+                        <h3>Initialisation de l'application</h3>
+                        <p>On initialise une application stimulus sur la page: Voir this.application dans le Controller</p>
+                        <p>La configuration du projet ici permet un chargement automatique des Controller</p>
+                        <p>
+                            Il est possible de register manuellement des Controllers avec: application.register('identifier', controler_file.js)<br>
+                            Pratique notamment pour surchager des controllers apportés par des bundles !!!
+                        </p>
+                        <p>
+                            On peut ajouter la méthode static get shouldLoad(): bool dans le controller pour savoir s'il doit être load ou pas (En fonction des environnements etc)<br>
+                            method afterLoad()
+                        </p>
+
+
+                        <h3>Communication entre Controllers</h3>
+                        <p>Il est possible de communiquer entre Controllers grâce aux Events et Actions: C'est la solution privilégié. Voir plus loin pour les actions et events</p>
+                        <p>Cependant, cela ne fonctionne que pour des controllers dans le même scope. ie: Des Controllers sur le même élément</p>
+                        <p>Il est possible d'accéder à toutes les autres instances de Controller depuis un Controller en utilisant la méthode:
+                            <br>
+                            this.application.getControllerForElementAndIdentifier(HTMLElement, Identifier)
+                        </p>
+
+                        <h3>LifeCycleCallBacks</h3>
+                        <p>Comme tout component Js moderne, les Controllers possèdent des méthodes appelées aux différents stades de leur cycle de vie:
+                            <br>
+                            <ul>
+                            <li>initialize() => Une seul fois, lors de l'instantiation</li>
+                            <li>connect() => A chaque fois que le Controller se connect</li>
+                            <li>disconnect() => A chaque fois que le Controller se déconnecte</li>
+                        </ul>
+                        Vous pouvez retrouver les conditions nécessaires aux connections et déconnexions des Controllers
+                        <a href="https://stimulus.hotwired.dev/reference/lifecycle-callbacks#connection">ici</a>
+                        </p>
+
+
+                        <h2>Evénements et Actions</h2>
+                        <h3>Les events</h3>
+                        <p>Les Controller sont capables d'envoyer facilement des events grâce à la méthode dispatch.</p>
+                        <p>On peut passer des options supplémentaires à l'event: <a href="https://stimulus.hotwired.dev/reference/controllers#cross-controller-coordination-with-events">ici</a></p>
+
+                        <div data-controller="clipboard effects" data-action="clipboard:copy->effects#flash">
+                            PIN: <input data-clipboard-target="source" type="text" value="1234" readonly>
+                            <button data-action="clipboard#copy">Copy to Clipboard</button>
+                        </div>
+
+                        <h3>Les actions</h3>
+                        <p>La syntaxe pour les actions: <br>
+                            data-action="[event-name]->[identifier]#[method]" => action descriptor
+                        </p>
+                        <p>
+                            La méthode liée à l'event recoit deux paramètres: <br>
+                            - l'objet DOM qui l'a déclenché<br>
+                            - L'objet Event Js qui a été appelé<br><br>
+
+                            On peut ajouter des paramètre à l'Event Js avec l'attribut:<br>
+                            data-[identifier-controller]-[param-name]-param<br>
+                            Ils doivent être sûr l'élément qui déclenche l'action
+                            Leur type est typecaste automatique en Number, String, Object ou Boolean
+                        </p>
+
+                        <div data-controller="item spinner">
+                            <button data-action="item#upvote spinner#start"
+                                    data-item-id-param="12345"
+                                    data-item-url-param="/votes"
+                                    data-item-payload-param='{"value":"1234567"}'
+                                    data-item-active-param="true">…</button>
+                        </div>
+
+
+                        <h4>Shortcuts</h4>
+                        <p>Il existe des raccourcis pour l'appel des events: <br>
+                            Ex: les buttons n'ont pas besoin d'appeler 'click'<br>
+                            Voir la liste des raccourcis <a href="https://stimulus.hotwired.dev/reference/actions#event-shorthand">ici</a>
+                        </p>
+
+                        <h4>Key board filters</h4>
+                        <p>
+                            Prise en charge des KeyboardEvent: https://stimulus.hotwired.dev/reference/actions#keyboardevent-filter
+                            <div data-controller="modal"
+                                 data-action="keydown.esc->modal#close" tabindex="0">
+                            </div>
+                            On peut changer le keyMapping => Exemple ajouter at pour '@'
+                        </p>
+
+                        <h4>Actions globales</h4>
+                        <p>
+                            On peut déclencer des actions sur des événements globaux du dom ou de la window
+                            Exemple:
+                            <div data-controller="gallery"
+                                 data-action="resize@window->gallery#layout">
+                            </div>
+                            On peut ajouter des options sur les actions
+                            <div data-controller="gallery"
+                                 data-action="resize@window->gallery#layout:once">
+                            </div>
+                            On peut créer ses propres options pour les actions
+                            Voir plus: https://stimulus.hotwired.dev/reference/actions#options
+                        </p>
+
+                        <h4>Actions en chaînes</h4>
+                        <p>
+                            On peut avoir plusieurs actions => séparées pour " "
+                            Elles sont lues et exécutées de gauche à droite
+                        </p>
+
+                        <h2>Les Targets</h2>
+                        <p>
+                            On peut identifier des éléments dans notre Component avec l'attribut:<br>
+                            data-[identifier-controller]-target="Nom de la target"<br>
+                            On peut mettre plusieurs noms à la target et y faire référence dans le Controller
+
+                            Les targets sont définies dans le Controller avec la propriété static targets qui est un tableau
+                            // controllers/search_controller.js
+                            import { Controller } from "@hotwired/stimulus"
+
+                            export default class extends Controller {
+                            static targets = [ "query", "errorMessage", "results" ]
+                            // …
+                            }
+                        </p>
+                        <p>
+                            Dans le Controller on peut accéder aux targets à l'aide de:
+                            this.[name]Target
+                            this.[name]Targets
+                            this.has[Name]Target //Optionnal target
+
+                            Rappel LifeCycleCallBacks:
+                            [name]TargetConnected
+                            [name]TargetDisconnected
+
+                        </p>
+
+                        <h2>Les values</h2>
+                        <p>Les values sont comme les props en VueJs. Il s'agit de paramètre passés au Controller.</p>
+                        <p>On a pas à proprement de state du Controller en stimulus.</p>
+                        <p>Par contre, on va garder la synchro entre la valeur de la Value dans le controller et celle de son attribut</p>
+                        <p>data-[identifier]-[valueName]-value</p>
+
+                        <strong>Exemple</strong>
+                        <div data-controller="loader" data-loader-url-value="/async/users">
+
+                        </div>
+
+                        <h2>Les outlets</h2>
+                        <p>
+                            Autre moyen de récupérer d'autre Controllers
+                            data-[identifier-controller]-[outlet]-outlet="[selector]"
+                            [outlet] = identifier des autres controllers
+                            [selector] selecteur css
+
+                            Même principe que les targets mais avec des Controllers:
+                        <div>
+                            <div class="online-user" data-controller="user-status">...</div>
+                            <div class="online-user" data-controller="user-status">...</div>
+                            ...
+                        </div>
+
+
+                        ...
+
+                        <div data-controller="chat" data-chat-user-status-outlet=".online-user">
+                            ...
+                        </div>
+
+                        Pas forcément des Controllers nested => Partout sur la page
+
+                        On définie les outlets avec la propriété static outlets dans le Controller = pareil que les targets
+                        // chat_controller.js
+
+                        export default class extends Controller {
+                        static outlets = [ "user-status" ]
+
+                        connect () {
+                        this.userStatusOutlets.forEach(status => ...)
+                        }
+                        }
+
+                        On peut accéder aux outlets dans le Controller via les méthodes:
+                        has[Name]Outlet
+                        [name]Outlet //Controller
+                        [name]Outlets //Controllers
+                        [name]OutletElement //Controller Element
+                        [name]OutletElements //Controllers Element
+
+
+                        On peut accéder à tout ce qui est définit par l'outlet
+                        Méthodes, propriétés, classes, targets et même l'Element de l'outlet
+
+                        LifeCycleCallBacks
+                        [name]OutletConnected()
+                        [name]OutletDisconnected()
+                        </p>
+                    </div>
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>
+                                    Composant
+                                </th>
+                                <th>
+                                    Attribut
+                                </th>
+                                <th>
+                                    Element
+                                </th>
+                                <th>
+                                    Définition
+                                </th>
+                                <th>
+                                    Properties
+                                </th>
+                                <th>
+                                    Methods
+                                </th>
+                                <th>
+                                    LifeCycleCallBacks
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Controller</td>
+                                <td>data-controller="[identifier]"</td>
+                                <td>Element racine</td>
+                                <td>Aucune</td>
+                                <td>this</td>
+                                <td></td>
+                                <td>initialize() / connect() / disconnect()</td>
+                            </tr>
+                            <tr>
+                                <td>Targets</td>
+                                <td>data-[identifier]-target="[targetName]"</td>
+                                <td>Un élément enfant de l'élément racine</td>
+                                <td>static targets: string[] = ['targetName']</td>
+                                <td>this.[targetName]Target / this.[targetName]Targets / this.has[TargetName]Target</td>
+                                <td></td>
+                                <td>targetNameConnected() / targetNameDisconnected()</td>
+                            </tr>
+                            <tr>
+                                <td>Values</td>
+                                <td>data-[identifier]-[value-name]-value="[value]"</td>
+                                <td>Elément racine</td>
+                                <td>static values: {} = {valueName: typeof}</td>
+                                <td>this.[valueName]Value / this.[valueName]Value / this.has[ValueName]Value</td>
+                                <td>getters and setters</td>
+                                <td>valueNameChanged(value, oldValue)</td>
+                            </tr>
+                            <tr>
+                                <td>Actions</td>
+                                <td>data-action="[action-descriptor]"</td>
+                                <td>Tout élémént</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Outlets</td>
+                                <td>data-[identifier]-[outlet]-outlet="[cssSelektor]"</td>
+                                <td>Elément racine</td>
+                                <td>static outlets: string[] = [outlet]</td>
+                                <td>this.[outlet]Outlet / this.[outlet]outlet / this.has[Outlet]Outlet / this.[outlet]OutletElement / this.[outlet]OutletElements</td>
+                                <td></td>
+                                <td>outletConnected(outlet, element) / outletDisconnected(outlet, element)</td>
+                            </tr>
+                            <tr>
+                                <td>Classes CSS</td>
+                                <td>data-[identifier]-[logicalName]-class="[classValues]"</td>
+                                <td>Elément racine</td>
+                                <td>static classes: string[] = ["logicalName"]</td>
+                                <td>this.[logicalName]Class / this.[logicalName]Classes / this.has[logicalName]Class</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         {% endblock %}
     </body>
 </html>

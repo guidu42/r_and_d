@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus';
+import {Application} from "@hotwired/stimulus/dist/types/core/application";
 
 /*
  * This is an example Stimulus controller!
@@ -11,6 +12,17 @@ import { Controller } from '@hotwired/stimulus';
  */
 export default class extends Controller {
     connect() {
-        this.element.textContent = 'Hello Stimulus! Edit me in assets/controllers/hello_controller.js';
+        console.log(this);
+        console.log(this.application);
+        console.log(this.identifier);
+    }
+
+    static get shouldLoad()
+    {
+        return true;
+    }
+
+    static afterLoad(_identifier: string, _application: Application) {
+        console.log('AFTER LOADED')
     }
 }
